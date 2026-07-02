@@ -1,0 +1,44 @@
+﻿@model List<RegistroJugador>
+@{
+    ViewData["Title"] = "Jugadores Registrados";
+}
+
+<section class="panel" data-testid="panel-lista">
+    <div class="panel__scanline"></div>
+    <h1 class="panel__title">Jugadores Registrados</h1>
+    <p class="panel__subtitle">Total: <strong id="totalRegistros" data-testid="total-registros">@Model.Count</strong> jugadores</p>
+
+    <div class="tabla-wrapper">
+        <table class="tabla-gamer" id="tablaJugadores" data-testid="tabla-jugadores">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>País</th>
+                    <th>Género</th>
+                    <th>Nivel</th>
+                    <th>Fecha Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var jugador in Model)
+                {
+                    <tr data-testid="fila-jugador" data-id="@jugador.Id">
+                        <td>@jugador.Id</td>
+                        <td>@jugador.Nombre @jugador.Apellido</td>
+                        <td>@jugador.Email</td>
+                        <td>@jugador.Pais</td>
+                        <td>@jugador.Genero</td>
+                        <td>@jugador.NivelExperiencia</td>
+                        <td>@jugador.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-actions">
+        <a asp-controller="Registro" asp-action="Index" class="btn btn--primary">⚡ Nuevo Registro</a>
+    </div>
+</section>

@@ -56,6 +56,18 @@ namespace FormularioGamerWeb.Controllers
                 return View(modelo);
             }
 
+            // ======================================================================
+            // AGREGA ESTE BLOQUE AQUÍ PARA CORREGIR EL CASO 8:
+            // ======================================================================
+            // VALIDACIÓN 1B: La fecha de nacimiento no puede ser una fecha futura
+            // ----------------------------------------------------------------------
+            if (modelo.FechaNacimiento > DateTime.Today)
+            {
+                ModelState.AddModelError("FechaNacimiento", "La fecha de nacimiento no puede ser una fecha futura.");
+                TempData["MensajeError"] = "Revisa los campos marcados, hay datos inválidos o faltantes.";
+                return View(modelo);
+            }
+
             // ----------------------------------------------------------
             // VALIDACIÓN 2: Email único (consulta directa a la BD)
             // ----------------------------------------------------------

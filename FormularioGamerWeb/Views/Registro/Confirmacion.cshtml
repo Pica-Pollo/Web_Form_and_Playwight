@@ -1,0 +1,28 @@
+﻿@model RegistroJugador
+@{
+    ViewData["Title"] = "Registro Exitoso";
+}
+
+<section class="panel panel--confirmacion" data-testid="panel-confirmacion">
+    <div class="panel__scanline"></div>
+    <div class="confirmacion__icono">✓</div>
+    <h1 class="panel__title">¡Personaje Creado!</h1>
+    <p class="panel__subtitle">Tu ficha de jugador fue guardada correctamente en la base de datos.</p>
+
+    <div class="confirmacion__card" id="resumenRegistro" data-testid="resumen-registro">
+        <p><strong>ID de Registro:</strong> <span data-testid="resumen-id">@Model.Id</span></p>
+        <p><strong>Nombre:</strong> <span data-testid="resumen-nombre">@Model.Nombre @Model.Apellido</span></p>
+        <p><strong>Correo:</strong> <span data-testid="resumen-email">@Model.Email</span></p>
+        <p><strong>País:</strong> <span data-testid="resumen-pais">@Model.Pais</span></p>
+        <p><strong>Fecha de Registro:</strong> <span data-testid="resumen-fecha">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</span></p>
+    </div>
+
+    <div class="form-actions">
+        <a asp-controller="Registro" asp-action="Index" class="btn btn--primary" data-testid="btn-nuevo-registro">
+            ⚡ Registrar Otro Jugador
+        </a>
+        <a asp-controller="Registro" asp-action="Lista" class="btn btn--ghost" data-testid="btn-ver-lista">
+            📋 Ver Todos los Jugadores
+        </a>
+    </div>
+</section>

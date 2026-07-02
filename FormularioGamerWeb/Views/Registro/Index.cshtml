@@ -1,0 +1,288 @@
+﻿@model RegistroJugador
+@{
+    ViewData["Title"] = "Registro de Jugador";
+}
+
+<section class="panel panel--hero" data-section="hero">
+    <div class="panel__scanline"></div>
+    <h1 class="panel__title">
+        <span class="panel__eyebrow">Nueva Ficha de Jugador</span>
+        Crea tu Personaje
+    </h1>
+    <p class="panel__subtitle">Completa todos los campos para unirte al servidor.</p>
+</section>
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alerta alerta--error" id="alertaError" data-testid="alerta-error">
+        ⚠ @TempData["MensajeError"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alerta alerta--error" data-testid="alerta-validacion">
+        <strong>Corrige los siguientes errores:</strong>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-controller="Registro" asp-action="Index" method="post" enctype="multipart/form-data"
+      id="formularioRegistro" class="form-gamer" novalidate>
+    @Html.AntiForgeryToken()
+
+    <!-- ============================================================ -->
+    <!-- SECCIÓN 1: DATOS BÁSICOS -->
+    <!-- ============================================================ -->
+    <fieldset class="form-section" data-section="datos-basicos">
+        <legend class="form-section__title"><span class="form-section__num">01</span> Datos Básicos</legend>
+
+        <div class="form-grid">
+            <!-- 1. TextBox: Nombre -->
+            <div class="form-field">
+                <label asp-for="Nombre" class="form-field__label"></label>
+                <input asp-for="Nombre" class="form-control input-texto" placeholder="Ej: Akira"
+                       data-testid="input-nombre" autocomplete="given-name" />
+                <span asp-validation-for="Nombre" class="form-field__error"></span>
+            </div>
+
+            <!-- 2. TextBox: Apellido -->
+            <div class="form-field">
+                <label asp-for="Apellido" class="form-field__label"></label>
+                <input asp-for="Apellido" class="form-control input-texto" placeholder="Ej: Tanaka"
+                       data-testid="input-apellido" autocomplete="family-name" />
+                <span asp-validation-for="Apellido" class="form-field__error"></span>
+            </div>
+
+            <!-- 3. Email -->
+            <div class="form-field">
+                <label asp-for="Email" class="form-field__label"></label>
+                <input asp-for="Email" type="email" class="form-control input-email" placeholder="jugador@@correo.com"
+                       data-testid="input-email" autocomplete="email" />
+                <span asp-validation-for="Email" class="form-field__error"></span>
+            </div>
+
+            <!-- 4. Password -->
+            <div class="form-field">
+                <label asp-for="Password" class="form-field__label"></label>
+                <input asp-for="Password" type="password" class="form-control input-password" placeholder="Mínimo 8 caracteres"
+                       data-testid="input-password" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="form-field__error"></span>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- SECCIÓN 2: PERFIL -->
+    <!-- ============================================================ -->
+    <fieldset class="form-section" data-section="perfil">
+        <legend class="form-section__title"><span class="form-section__num">02</span> Perfil del Jugador</legend>
+
+        <div class="form-grid">
+            <!-- 5. Number -->
+            <div class="form-field">
+                <label asp-for="Edad" class="form-field__label"></label>
+                <input asp-for="Edad" type="number" min="18" max="99" class="form-control input-numero"
+                       data-testid="input-edad" />
+                <span asp-validation-for="Edad" class="form-field__error"></span>
+            </div>
+
+            <!-- 6. Date Picker -->
+            <div class="form-field">
+                <label asp-for="FechaNacimiento" class="form-field__label"></label>
+                <input asp-for="FechaNacimiento" type="date" class="form-control input-fecha"
+                       data-testid="input-fecha-nacimiento" />
+                <span asp-validation-for="FechaNacimiento" class="form-field__error"></span>
+            </div>
+
+            <!-- 7. Time Picker -->
+            <div class="form-field">
+                <label asp-for="HoraPreferida" class="form-field__label"></label>
+                <input asp-for="HoraPreferida" type="time" class="form-control input-hora"
+                       data-testid="input-hora-preferida" />
+                <span asp-validation-for="HoraPreferida" class="form-field__error"></span>
+            </div>
+
+            <!-- 9. Radio Button: Genero -->
+            <div class="form-field form-field--full">
+                <span class="form-field__label">Género</span>
+                <div class="radio-group" data-testid="grupo-genero">
+                    <label class="radio-pill">
+                        <input type="radio" name="Genero" value="Masculino" class="radio-input"
+                               data-testid="radio-genero-masculino"
+                               checked='@(Model.Genero == "Masculino" ? "checked" : null)' />
+                        <span>Masculino</span>
+                    </label>
+                    <label class="radio-pill">
+                        <input type="radio" name="Genero" value="Femenino" class="radio-input"
+                               data-testid="radio-genero-femenino"
+                               checked='@(Model.Genero == "Femenino" ? "checked" : null)' />
+                        <span>Femenino</span>
+                    </label>
+                    <label class="radio-pill">
+                        <input type="radio" name="Genero" value="Otro" class="radio-input"
+                               data-testid="radio-genero-otro"
+                               checked='@(Model.Genero == "Otro" ? "checked" : null)' />
+                        <span>Otro</span>
+                    </label>
+                </div>
+                <span asp-validation-for="Genero" class="form-field__error"></span>
+            </div>
+        </div>
+
+        <!-- 8. TextArea -->
+        <div class="form-field">
+            <label asp-for="Biografia" class="form-field__label"></label>
+            <textarea asp-for="Biografia" class="form-control input-textarea" rows="4" maxlength="500"
+                      placeholder="Cuéntanos tu historia..." data-testid="textarea-biografia"></textarea>
+            <span asp-validation-for="Biografia" class="form-field__error"></span>
+        </div>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- SECCIÓN 3: PREFERENCIAS -->
+    <!-- ============================================================ -->
+    <fieldset class="form-section" data-section="preferencias">
+        <legend class="form-section__title"><span class="form-section__num">03</span> Preferencias</legend>
+
+        <div class="form-grid">
+            <!-- 10. Select: Pais -->
+            <div class="form-field">
+                <label asp-for="Pais" class="form-field__label"></label>
+                <select asp-for="Pais" class="form-control input-select" id="selectPais">
+                    <option value="">-- Selecciona un país --</option>
+                    <option value="México">México</option>
+                    <option value="Colombia">Colombia</option>
+                    <option value="Argentina">Argentina</option>
+                    <option value="Chile">Chile</option>
+                    <option value="España">España</option>
+                    <option value="Perú">Perú</option>
+                    <option value="Estados Unidos">Estados Unidos</option>
+                    <option value="Japón">Japón</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <span asp-validation-for="Pais" class="form-field__error"></span>
+            </div>
+
+            <!-- 11. Select: Plataforma -->
+            <div class="form-field">
+                <label asp-for="PlataformaFavorita" class="form-field__label"></label>
+                <select asp-for="PlataformaFavorita" class="form-control input-select">
+                    <option value="">-- Selecciona --</option>
+                    <option value="PC">PC</option>
+                    <option value="PlayStation">PlayStation</option>
+                    <option value="Xbox">Xbox</option>
+                    <option value="Nintendo Switch">Nintendo Switch</option>
+                    <option value="Móvil">Móvil</option>
+                </select>
+                <span asp-validation-for="PlataformaFavorita" class="form-field__error"></span>
+            </div>
+
+            <!-- 14. Range Slider -->
+            <div class="form-field">
+                <label asp-for="NivelExperiencia" class="form-field__label">
+                    Nivel de Experiencia: <output id="valorExperiencia" data-testid="valor-experiencia">@Model.NivelExperiencia</output>
+                </label>
+                <input asp-for="NivelExperiencia" type="range" min="1" max="100" class="input-range"
+                       id="rangoExperiencia" data-testid="slider-experiencia" />
+                <span asp-validation-for="NivelExperiencia" class="form-field__error"></span>
+            </div>
+
+            <!-- 15. Color Picker -->
+            <div class="form-field">
+                <label asp-for="ColorFavorito" class="form-field__label"></label>
+                <div class="color-picker-row">
+                    <input asp-for="ColorFavorito" type="color" class="input-color" id="colorFavorito"
+                           data-testid="input-color" />
+                    <span id="colorValorTexto" class="color-picker-row__value">@Model.ColorFavorito</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 16. File Upload -->
+        <div class="form-field">
+            <label asp-for="AvatarArchivo" class="form-field__label"></label>
+            <div class="file-upload" data-testid="file-upload-wrapper">
+                <input asp-for="AvatarArchivo" type="file" accept="image/*" class="input-file" id="avatarArchivo"
+                       data-testid="input-avatar" />
+                <label for="avatarArchivo" class="file-upload__label">📁 Seleccionar Avatar</label>
+                <span class="file-upload__name" id="nombreArchivo">Ningún archivo seleccionado</span>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- SECCIÓN 4: CONFIRMACIÓN -->
+    <!-- ============================================================ -->
+    <fieldset class="form-section" data-section="confirmacion">
+        <legend class="form-section__title"><span class="form-section__num">04</span> Confirmación</legend>
+
+        <!-- 17. Audio Control (efecto de sonido, generado vía Web Audio API, sin archivos externos) -->
+        <div class="form-field">
+            <span class="form-field__label">Efecto de Sonido</span>
+            <div class="audio-control" data-testid="audio-control">
+                <button type="button" id="botonProbarSonido" class="btn btn--ghost btn--small" data-testid="btn-probar-sonido">
+                    🔊 Probar Sonido
+                </button>
+                <label class="switch-toggle">
+                    <input type="checkbox" id="sonidoActivado" name="SonidoActivado"
+                           value="true" data-testid="toggle-sonido"
+                           checked='@(Model.SonidoActivado ? "checked" : null)' />
+                    <span class="switch-toggle__slider"></span>
+                    <span class="switch-toggle__text">Sonido Activado</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 13. Switch: Notificaciones -->
+        <div class="form-field">
+            <label class="switch-toggle" for="recibirNotificaciones">
+                <input type="checkbox" id="recibirNotificaciones" name="RecibirNotificaciones"
+                       value="true" data-testid="toggle-notificaciones"
+                       checked='@(Model.RecibirNotificaciones ? "checked" : null)' />
+                <span class="switch-toggle__slider"></span>
+                <span class="switch-toggle__text">Recibir Notificaciones por Correo</span>
+            </label>
+        </div>
+
+        <!-- 12. CheckBox: Términos -->
+        <div class="form-field">
+            <label class="checkbox-row" for="aceptaTerminos">
+                <input type="checkbox" id="aceptaTerminos" name="AceptaTerminos"
+                       value="true" class="checkbox-input" data-testid="checkbox-terminos"
+                       checked='@(Model.AceptaTerminos ? "checked" : null)' />
+                <span>Acepto los <a href="#" tabindex="-1">Términos y Condiciones</a> <em>*</em></span>
+            </label>
+            <span asp-validation-for="AceptaTerminos" class="form-field__error"></span>
+        </div>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- BOTONES -->
+    <!-- ============================================================ -->
+    <div class="form-actions">
+        <button type="reset" class="btn btn--secondary" id="botonLimpiar" data-testid="btn-limpiar">
+            🔄 Limpiar
+        </button>
+        <a asp-controller="Registro" asp-action="Index" class="btn btn--ghost" id="botonCancelar" data-testid="btn-cancelar">
+            ✖ Cancelar
+        </a>
+        <button type="submit" class="btn btn--primary" id="botonGuardar" data-testid="btn-guardar">
+            ⚡ Guardar Personaje
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Hook para que site.js sepa el valor inicial del slider (último <fieldset> de la sección 3)
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.GamerForm) window.GamerForm.init();
+        });
+    </script>
+}
