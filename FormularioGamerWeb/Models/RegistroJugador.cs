@@ -51,6 +51,7 @@ namespace FormularioGamerWeb.Models
         [Required(ErrorMessage = "La fecha de nacimiento es obligatoria")]
         [DataType(DataType.Date)]
         [Display(Name = "Fecha de Nacimiento")]
+        [FechaNacimientoValida]
         public DateTime FechaNacimiento { get; set; }
 
         // ---------------- 7. Time Picker ----------------
@@ -111,5 +112,27 @@ namespace FormularioGamerWeb.Models
 
         // ---------------- Metadatos ----------------
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
+    }
+
+    public class FechaNacimientoValidaAttribute : ValidationAttribute
+    {
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        {
+            if (value is DateTime fecha)
+            {
+                // Bloquea fechas futuras
+                if (fecha > DateTime.Today)
+                {
+                    return new ValidationResult("La fecha de nacimiento no puede ser una fecha futura.");
+                }
+
+                // Bloquea fechas de hace más de 120 años (el otro error del Caso 8)
+                if (fecha.Year < (DateTime.Today.Year - 120))
+                {
+                    return new ValidationResult("La fecha de nacimiento no es válida (excede los 120 años).");
+                }
+            }
+            return ValidationResult.Success;
+        }
     }
 }
