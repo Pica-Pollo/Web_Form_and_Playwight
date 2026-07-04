@@ -1,0 +1,31 @@
+{
+  "name": "automatizacion-formulario-gamer",
+  "version": "1.0.0",
+  "description": "Automatización con Playwright del Formulario Gamer Web (ASP.NET Core + SQL Server)",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:un-registro": "playwright test 11-un-registro-excel.spec.js --headed",
+    "test:todos-los-registros": "playwright test 12-todos-los-registros-excel.spec.js --headed",
+    "generar-excel": "node data/generate-excel-data.js"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "testing",
+    "excel"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "xlsx": "^0.18.5"
+  }
+}
