@@ -64,20 +64,8 @@ curl "http://localhost:5180/Registro/GetWeather?latitude=40.4168&longitude=-3.70
 
 **Analizar desempeño:**
 ```powershell
-$body = @{
-    id = 1
-    nombre = "Juan"
-    apellido = "García"
-    edad = 25
-    genero = "Masculino"
-    plataformaFavorita = "PC"
-    nivelExperiencia = 75
-    fechaNacimiento = "1998-05-20T00:00:00"
-} | ConvertTo-Json
-
-curl -Method POST http://localhost:5180/Registro/AnalyzePerformance `
-  -ContentType "application/json" `
-  -Body $body
+curl -Method POST "http://localhost:5180/Registro/AnalyzePerformance?id=1" `
+    -UseBasicParsing
 
 # Respuesta: {skillIndex: 72, winRate: 0.65, nivel: "Profesional", recomendaciones: [...]}
 ```

@@ -194,7 +194,7 @@ namespace FormularioGamerWeb.Controllers
         // ============================================================
         // POST: /Registro/AnalyzePerformance → Llamar SOAP Service
         // ============================================================
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> AnalyzePerformance(int id)
         {
             try
