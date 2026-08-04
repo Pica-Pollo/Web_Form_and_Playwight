@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using FormularioGamerWeb.Data;
+using FormularioGamerWeb.Contracts.SOAP.ServiceContracts;
+using FormularioGamerWeb.Services.SOAP;
+using FormularioGamerWeb.Services.REST;
+using FormularioGamerWeb.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +19,33 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ============================================================
+// 2. REGISTRO DE SERVICIOS SOAP (CoreWCF)
+// ============================================================
+
+// Registra el servicio SOAP y sus dependencias
+builder.Services.AddScoped<PerformanceCalculator>();
+builder.Services.AddScoped<IPlayerPerformanceService, PlayerPerformanceService>();
+
+// ============================================================
+// 3. REGISTRO DE SERVICIOS REST (HTTP Client)
+// ============================================================
+
+// Registra HttpClient para consumir APIs externas
+builder.Services.AddHttpClient<IWeatherClient, WeatherClient>();
+
 var app = builder.Build();
 
 // ============================================================
-// 2. PIPELINE DE MIDDLEWARE (Orden de ejecución de cada request)
+// 3. CONFIGURAR SERVICIO SOAP (CoreWCF) - ANTES del pipeline
+// ============================================================
+
+// Nota: CoreWCF SOAP está comentado por ahora (se activará cuando sea necesario)
+// El servicio PlayerPerformanceService está disponible como inyección de dependencias
+// y se puede llamar directamente desde Controllers
+
+// ============================================================
+// 3. PIPELINE DE MIDDLEWARE (Orden de ejecución de cada request)
 // ============================================================
 
 if (!app.Environment.IsDevelopment())

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FormularioGamerWeb.Data;
 using FormularioGamerWeb.Models;
+using FormularioGamerWeb.Contracts.SOAP.ServiceContracts;
+using FormularioGamerWeb.Services.REST;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,23 +11,37 @@ namespace FormularioGamerWeb.Controllers
 {
     /// <summary>
     /// Controlador del formulario de registro de jugador.
-    /// Maneja: mostrar el formulario (GET), procesar el envío (POST),
-    /// y exponer endpoints JSON simples para que Playwright (u otras
-    /// herramientas) puedan VERIFICAR que los datos quedaron guardados.
+    /// Funcionalidades:
+    /// 1. Mostrar formulario vacío (GET)
+    /// 2. Procesar registro (POST)
+    /// 3. Confirmar registro (confirmación)
+    /// 4. Analizar desempeño (integrar SOAP)
+    /// 5. Mostrar clima (integrar API REST)
     /// </summary>
     public class RegistroController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IPlayerPerformanceService _performanceService;
+        private readonly IWeatherClient _weatherClient;
+        private readonly ILogger<RegistroController> _logger;
 
-        public RegistroController(ApplicationDbContext context, IWebHostEnvironment environment)
+        public RegistroController(
+            ApplicationDbContext context, 
+            IWebHostEnvironment environment,
+            IPlayerPerformanceService performanceService,
+            IWeatherClient weatherClient,
+            ILogger<RegistroController> logger)
         {
             _context = context;
             _environment = environment;
+            _performanceService = performanceService;
+            _weatherClient = weatherClient;
+            _logger = logger;
         }
 
         // ============================================================
-        // GET: /Registro/Index  -> Muestra el formulario vacío
+        // GET: /Registro/Index  → Muestra el formulario vacío
         // ============================================================
         [HttpGet]
         public IActionResult Index()
@@ -40,7 +56,7 @@ namespace FormularioGamerWeb.Controllers
         }
 
         // ============================================================
-        // POST: /Registro/Index -> Procesa el envío del formulario
+        // POST: /Registro/Index → Procesa el envío del formulario
         // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -55,8 +71,6 @@ namespace FormularioGamerWeb.Controllers
                 TempData["MensajeError"] = "Revisa los campos marcados, hay datos inválidos o faltantes.";
                 return View(modelo);
             }
-
-
 
             // ----------------------------------------------------------
             // VALIDACIÓN 2: Email único (consulta directa a la BD)
@@ -130,7 +144,7 @@ namespace FormularioGamerWeb.Controllers
             await _context.SaveChangesAsync();
 
             // ----------------------------------------------------------
-            // VALIDAR QUE SE GUARDÓ CORRECTAMENTE (lectura de confirmación)
+            // VALIDAR QUE SE GUARDÓ CORRECTAMENTE
             // ----------------------------------------------------------
             var registroGuardado = await _context.RegistrosJugadores
                 .AsNoTracking()
@@ -142,12 +156,14 @@ namespace FormularioGamerWeb.Controllers
                 return View(modelo);
             }
 
+            _logger.LogInformation($"Nuevo jugador registrado: {modelo.Email}");
+
             // Redirige a la página de confirmación (patrón Post-Redirect-Get)
             return RedirectToAction("Confirmacion", new { id = modelo.Id });
         }
 
         // ============================================================
-        // GET: /Registro/Confirmacion/5 -> Página de éxito
+        // GET: /Registro/Confirmacion/5 → Página de éxito
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Confirmacion(int id)
@@ -155,89 +171,151 @@ namespace FormularioGamerWeb.Controllers
             var registro = await _context.RegistrosJugadores.FindAsync(id);
             if (registro == null)
             {
-                return NotFound();
+                TempData["MensajeError"] = "No se encontró el registro.";
+                return RedirectToAction("Index");
             }
+
             return View(registro);
         }
 
         // ============================================================
-        // GET: /Registro/Lista -> Lista todos los registros (para revisar)
+        // GET: /Registro/Lista → Lista de jugadores registrados
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Lista()
         {
-            var registros = await _context.RegistrosJugadores
-                .AsNoTracking()
+            var jugadores = await _context.RegistrosJugadores
                 .OrderByDescending(r => r.FechaRegistro)
                 .ToListAsync();
-            return View(registros);
+
+            return View(jugadores);
         }
 
         // ============================================================
-        // API JSON simple: GET /Registro/ApiUsuarios
-        // Útil para que Playwright (u otra herramienta) verifique
-        // por código que los registros quedaron en la base de datos,
-        // sin necesidad de abrir SSMS.
+        // POST: /Registro/AnalyzePerformance → Llamar SOAP Service
         // ============================================================
-        [HttpGet]
-        public async Task<IActionResult> ApiUsuarios()
+        [HttpPost]
+        public async Task<IActionResult> AnalyzePerformance(int id)
         {
-            var registros = await _context.RegistrosJugadores
-                .AsNoTracking()
-                .OrderByDescending(r => r.FechaRegistro)
-                .Select(r => new
-                {
-                    r.Id,
-                    r.Nombre,
-                    r.Apellido,
-                    r.Email,
-                    r.Pais,
-                    r.Genero,
-                    r.FechaRegistro
-                })
-                .ToListAsync();
-
-            return Json(new { success = true, count = registros.Count, data = registros });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ApiUsuarioPorEmail(string email)
-        {
-            var registro = await _context.RegistrosJugadores
-                .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.Email == email);
-
-            if (registro == null)
+            try
             {
-                return Json(new { success = false, message = "No encontrado" });
+                var jugador = await _context.RegistrosJugadores.FindAsync(id);
+                if (jugador == null)
+                {
+                    return Json(new { success = false, message = "Jugador no encontrado" });
+                }
+
+                _logger.LogInformation($"Analizando desempeño para: {jugador.Email}");
+
+                // Llamar al servicio SOAP
+                var resultado = _performanceService.AnalyzePlayerPerformance(jugador);
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        resultado.SkillIndex,
+                        resultado.WinRate,
+                        resultado.Nivel,
+                        resultado.Clasificacion,
+                        resultado.GeneroRecomendado,
+                        resultado.DificultadRecomendada,
+                        resultado.Recomendaciones,
+                        resultado.AnalisisDetallado,
+                        resultado.PuntuacionGeneral,
+                        resultado.IdAnalisis
+                    }
+                });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error en AnalyzePerformance: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // ============================================================
+        // GET: /Registro/GetWeather?lat=...&lon=...
+        // Obtener datos climáticos (API REST externa)
+        // ============================================================
+        [HttpGet]
+        public async Task<IActionResult> GetWeather(double lat, double lon)
+        {
+            try
+            {
+                var weather = await _weatherClient.GetCurrentWeatherAsync(lat, lon);
+
+                if (weather == null)
+                {
+                    return Json(new { success = false, message = "No se pudieron obtener datos climáticos" });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        temperature = weather.Current?.Temperature,
+                        windSpeed = weather.Current?.WindSpeed,
+                        weatherCode = weather.Current?.WeatherCode,
+                        description = weather.GetWeatherDescription(),
+                        timezone = weather.Coordinates?.Timezone,
+                        latitude = weather.Coordinates?.Latitude,
+                        longitude = weather.Coordinates?.Longitude
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error en GetWeather: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // ============================================================
+        // GET: /Registro/Api/GetById/5 → Obtener jugador por ID (JSON)
+        // Útil para validación con Playwright
+        // ============================================================
+        [HttpGet("registro/api/getbyid/{id}")]
+        public async Task<IActionResult> ApiGetById(int id)
+        {
+            var registro = await _context.RegistrosJugadores.FindAsync(id);
+            if (registro == null)
+                return NotFound(new { message = "Jugador no encontrado" });
 
             return Json(new
             {
-                success = true,
-                data = new
-                {
-                    registro.Id,
-                    registro.Nombre,
-                    registro.Apellido,
-                    registro.Email,
-                    registro.Pais,
-                    registro.FechaRegistro
-                }
+                id = registro.Id,
+                nombre = registro.Nombre,
+                apellido = registro.Apellido,
+                email = registro.Email,
+                genero = registro.Genero,
+                nivel = registro.NivelExperiencia,
+                fechaRegistro = registro.FechaRegistro
             });
         }
 
         // ============================================================
-        // Hash simple de contraseña con SHA-256.
-        // Nota educativa: para producción real se recomienda BCrypt
-        // o ASP.NET Core Identity, que añaden "salt" automáticamente.
+        // GET: /Registro/Api/Count → Contar registros totales
         // ============================================================
-        private static string HashPassword(string password)
+        [HttpGet("registro/api/count")]
+        public async Task<IActionResult> ApiCount()
         {
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
+            var count = await _context.RegistrosJugadores.CountAsync();
+            return Json(new { totalJugadores = count });
+        }
+
+        // ============================================================
+        // MÉTODO PRIVADO: Hash de contraseña
+        // ============================================================
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
         }
     }
 }
