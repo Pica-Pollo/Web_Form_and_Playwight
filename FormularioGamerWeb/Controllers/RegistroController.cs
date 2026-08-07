@@ -306,6 +306,34 @@ namespace FormularioGamerWeb.Controllers
             return Json(new { totalJugadores = count });
         }
 
+        // GET: /Registro/Api/CalculateSkill?experiencia=5&genero=Accion&edad=22
+        [HttpGet("Registro/Api/CalculateSkill")]
+        public IActionResult ApiCalculateSkill(int experiencia, string genero, int edad)
+        {
+            var result = _performanceService.CalculateSkillIndex(experiencia, genero, edad);
+            return Json(new { skillIndex = result });
+        }
+
+        // GET: /Registro/Api/GenreRecommendations?id=1
+        [HttpGet("Registro/Api/GenreRecommendations")]
+        public async Task<IActionResult> ApiGenreRecommendations(int id)
+        {
+            var jugador = await _context.RegistrosJugadores.FindAsync(id);
+            if (jugador == null) return NotFound();
+            var result = _performanceService.GetGenreRecommendations(jugador);
+            return Json(new { recomendaciones = result });
+        }
+
+        // GET: /Registro/Api/ValidateRank?id=1&rank=Experto
+        [HttpGet("Registro/Api/ValidateRank")]
+        public async Task<IActionResult> ApiValidateRank(int id, string rank)
+        {
+            var jugador = await _context.RegistrosJugadores.FindAsync(id);
+            if (jugador == null) return NotFound();
+            var result = _performanceService.ValidatePlayerForRank(jugador, rank);
+            return Json(new { cumpleRequisitos = result, rangoObjetivo = rank });
+        }
+
         // ============================================================
         // MÉTODO PRIVADO: Hash de contraseña
         // ============================================================

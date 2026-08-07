@@ -32,7 +32,8 @@ Para integración con Playwright y automatización:
 | `/Registro/Api/GetById/{id}` | GET | Obtener datos de un jugador |
 | `/Registro/GetWeather?latitude=X&longitude=Y` | GET | Obtener clima actual |
 | `/Registro/AnalyzePerformance` | GET | Analizar desempeño de jugador |
-
+| `/PlayerPerformanceService.svc?wsdl` | GET | Servicio SOAP de desempeño de jugador |http://localhost:5180/PlayerPerformanceService.svc?wsdl
+'/servicio'|http://localhost:5180/servicio
 ---
 
 ## 📝 Cómo Probar

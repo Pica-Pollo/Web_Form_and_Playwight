@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Web Service - Análisis de Desempeño";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1>🎮 Player Performance Analysis Service</h1>
+        <p class="lead text-muted">Servicio SOAP para análisis de desempeño de jugadores</p>
+        <a href="/PlayerPerformanceService.svc?wsdl" target="_blank" class="btn btn-outline-primary">
+            📄 Ver WSDL
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📋 Información del Servicio</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr><th>Endpoint</th><td><code>/PlayerPerformanceService.svc</code></td></tr>
+                        <tr><th>WSDL</th><td><code>?wsdl</code></td></tr>
+                        <tr><th>Protocolo</th><td>SOAP / HTTP</td></tr>
+                        <tr><th>Namespace</th><td><code>formulariogamer.com/2026/08</code></td></tr>
+                        <tr><th>Framework</th><td>CoreWCF 1.9.1</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🔧 Operaciones Disponibles</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>AnalyzePlayerPerformance</strong>
+                            <br><small class="text-muted">Análisis completo: SkillIndex, WinRate, Nivel, Recomendaciones</small>
+                            <br><a href="/Registro/AnalyzePerformance?id=1" target="_blank"><code>/Registro/AnalyzePerformance?id=1</code></a>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>CalculateSkillIndex</strong>
+                            <br><small class="text-muted">Calcula solo el índice de habilidad (0–100)</small>
+                            <br><a href="/Registro/Api/CalculateSkill?experiencia=5&genero=Accion&edad=22" target="_blank"><code>/Registro/Api/CalculateSkill?experiencia=5&genero=Accion&edad=22</code></a>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>GetGenreRecommendations</strong>
+                            <br><small class="text-muted">Recomendaciones de género de juego personalizadas</small>
+                            <br><a href="/Registro/Api/GenreRecommendations?id=1" target="_blank"><code>/Registro/Api/GenreRecommendations?id=1</code></a>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>ValidatePlayerForRank</strong>
+                            <br><small class="text-muted">Valida si el jugador cumple requisitos para un rango</small>
+                            <br><a href="/Registro/Api/ValidateRank?id=1&rank=Experto" target="_blank"><code>/Registro/Api/ValidateRank?id=1&rank=Experto</code></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">🌤️ Servicio REST Externo Consumido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6>Open-Meteo Weather API</h6>
+                            <p class="text-muted mb-1">API gratuita que provee datos climáticos en tiempo real por coordenadas.</p>
+                            <code>GET /Registro/GetWeather?lat=18.4861&lon=-69.9312</code>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="/Registro/GetWeather?lat=18.4861&lon=-69.9312" target="_blank" class="btn btn-dark btn-sm">
+                                ▶ Probar (Santo Domingo)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

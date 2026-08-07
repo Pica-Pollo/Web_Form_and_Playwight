@@ -17,5 +17,10 @@ namespace FormularioGamerWeb.Controllers
         {
             return View();
         }
+
+        public IActionResult Servicio()
+        {
+            return View();
+        }
     }
 }

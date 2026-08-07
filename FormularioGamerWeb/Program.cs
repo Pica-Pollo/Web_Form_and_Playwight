@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using CoreWCF;
+using CoreWCF.Configuration;
 using FormularioGamerWeb.Data;
 using FormularioGamerWeb.Contracts.SOAP.ServiceContracts;
 using FormularioGamerWeb.Services.SOAP;
@@ -34,15 +36,28 @@ builder.Services.AddScoped<IPlayerPerformanceService, PlayerPerformanceService>(
 // Registra HttpClient para consumir APIs externas
 builder.Services.AddHttpClient<IWeatherClient, WeatherClient>();
 
+builder.Services.AddServiceModelServices();
+builder.Services.AddServiceModelMetadata(); // ← agregar esta también
+
 var app = builder.Build();
 
 // ============================================================
 // 3. CONFIGURAR SERVICIO SOAP (CoreWCF) - ANTES del pipeline
 // ============================================================
 
-// Nota: CoreWCF SOAP está comentado por ahora (se activará cuando sea necesario)
-// El servicio PlayerPerformanceService está disponible como inyección de dependencias
-// y se puede llamar directamente desde Controllers
+app.UseServiceModel(serviceBuilder =>
+{
+    serviceBuilder.AddService<PlayerPerformanceService>(options =>
+    {
+        options.DebugBehavior.IncludeExceptionDetailInFaults = true;
+    });
+
+    serviceBuilder.AddServiceEndpoint<PlayerPerformanceService, IPlayerPerformanceService>(
+        new BasicHttpBinding(), "/PlayerPerformanceService.svc");
+
+    var metadata = app.Services.GetRequiredService<CoreWCF.Description.ServiceMetadataBehavior>();
+    metadata.HttpGetEnabled = true;
+});
 
 // ============================================================
 // 3. PIPELINE DE MIDDLEWARE (Orden de ejecución de cada request)
@@ -69,5 +84,10 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Registro}/{action=Index}/{id?}");
+
+app.MapGet("/servicio", async context =>
+{
+    context.Response.Redirect("/Home/Servicio");
+});
 
 app.Run();
