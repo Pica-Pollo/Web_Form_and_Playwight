@@ -31,7 +31,7 @@ Para integración con Playwright y automatización:
 | `/Registro/Api/Count` | GET | Contar jugadores totales |
 | `/Registro/Api/GetById/{id}` | GET | Obtener datos de un jugador |
 | `/Registro/GetWeather?latitude=X&longitude=Y` | GET | Obtener clima actual |
-| `/Registro/AnalyzePerformance` | POST | Analizar desempeño de jugador |
+| `/Registro/AnalyzePerformance` | GET | Analizar desempeño de jugador |
 
 ---
 
